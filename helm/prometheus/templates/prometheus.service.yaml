@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.namespace }}
+  annotations:
+    prometheus.io/scrape: 'true'
+  labels:
+    name: {{ .Values.prometheus.service.name }}
+    kubernetes.io/name: "Prometheus"
+  name: {{ .Values.prometheus.service.name }}
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - name: prometheus
+    protocol: TCP
+    port: {{ .Values.prometheus.service.port }}
+    targetPort: 9090

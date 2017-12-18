@@ -1,0 +1,64 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: prometheus-deployment
+  annotations:
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      name: prometheus
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: {{ .Values.prometheus.spec.image }}
+        args:
+          - '-storage.local.retention=$(STORAGE_RETENTION)'
+          - '-storage.local.memory-chunks=$(STORAGE_MEMORY_CHUNKS)'
+          - '-config.file=/etc/prometheus/prometheus.yml'
+          - '-alertmanager.url=http://alertmanager:9093/alertmanager'
+          #- '-web.external-url=http://{{ .Values.prometheus.service.name }}:{{ .Values.prometheus.service.port }}'
+        ports:
+        - name: web
+          containerPort: 9090
+        env:
+        - name: STORAGE_RETENTION
+          valueFrom:
+            configMapKeyRef:
+              name: prometheus-env
+              key: storage-retention
+        - name: STORAGE_MEMORY_CHUNKS
+          valueFrom:
+            configMapKeyRef:
+              name: prometheus-env
+              key: storage-memory-chunks
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+        - name: rules-volume
+          mountPath: /etc/prometheus-rules
+        - name: prometheus-data
+          mountPath: /prometheus
+      imagePullSecrets:
+      - name: registrykey
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-configmap
+      - name: rules-volume
+        configMap:
+          name: prometheus-rules 
+      - name: prometheus-data
+        emptyDir: {}
+

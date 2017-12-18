@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+  name: grafana-dashboards
+  namespace: {{ .Values.namespace }}
+data:
+  pods.dashboard.json: {{ index .Values "grafana" "dashboards" "pods" | quote }}
+  resources.dashboard.json: {{ index .Values "grafana" "dashboards" "resources" | quote  }}

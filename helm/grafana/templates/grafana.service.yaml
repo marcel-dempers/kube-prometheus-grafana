@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: grafana
+  labels:
+    app: grafana
+    component: core
+spec:
+  selector:
+    app: grafana
+    component: core
+  ports:
+  - name: grafana
+    protocol: TCP
+    port: 3000
+    targetPort: 3000

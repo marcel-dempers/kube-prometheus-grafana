@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-import-dashboards
+  namespace: {{ .Values.namespace }}
+spec:
+  parallelism: 1
+  completions: 1
+  #backoffLimit: 1
+  template:
+    metadata:
+      name: grafana-import-dashboards
+    spec:
+      containers:
+      - name: grafana-import-dashboards
+        image: alpine:3.4
+        env:
+        - name: GRAFANA_API
+          value: http://grafana:3000
+        - name: PROMETHEUS_SERVICE
+          value: "{{ .Values.grafana.prometheus.endpoint }}"
+        command:
+        - "bin/sh"
+        - "-c" 
+        - |-
+          apk add --no-cache curl; 
+          #WTF IS THIS ? (Wait for grafana pod to be up before we start importing dashboards!)
+          sleep 1m
+          cd /opt/grafana-import-dashboards
+
+          echo "writing datasource..."
+          cat << EOF > k8-datasource.json
+          {
+            "name": "kubernetes",
+            "type": "prometheus",
+            "url": "$PROMETHEUS_SERVICE",
+            "access": "proxy"
+          }
+          EOF
+
+          echo "importing data sources..."
+          until $(curl --silent --fail --show-error --output /dev/null $GRAFANA_API/api/datasources); do
+              printf '.' ; sleep 1 ;
+          done ;
+          for file in *-datasource.json ; do
+          if [ -e "$file" ] ; then
+              echo "importing $file" &&
+              curl --silent --fail --show-error \
+              --request POST $GRAFANA_API/api/datasources \
+              --header "Content-Type: application/json" \
+              --data-binary "@$file" ;
+              echo "" ;
+          fi
+          done ;
+
+          file="pods.dashboard.json"
+          echo "importing $file" &&
+          (echo '{"dashboard":';cat "$file";echo ',"inputs":[{"name":"DS_KUBERNETES","pluginId":"prometheus","type":"datasource","value":"kubernetes"}]}') | curl --silent --fail --show-error \
+          --request POST $GRAFANA_API/api/dashboards/import \
+          --header "Content-Type: application/json" \
+          --data-binary @-;
+          echo "" ;
+
+          file="resources.dashboard.json"
+          echo "importing $file" &&
+          (echo '{"dashboard":';cat "$file";echo ',"inputs":[{"name":"DS_KUBERNETES","pluginId":"prometheus","type":"datasource","value":"kubernetes"}]}') | curl --silent --fail --show-error \
+          --request POST $GRAFANA_API/api/dashboards/import \
+          --header "Content-Type: application/json" \
+          --data-binary @-;
+          echo "" ;
+
+          while true; do
+          sleep 1m ;
+          done
+          exit 0;
+        
+        volumeMounts:
+        - name: granafa-dashboards
+          mountPath: /opt/grafana-import-dashboards
+      volumes:
+      - name: granafa-dashboards
+        configMap:
+          name: grafana-dashboards
+      restartPolicy: Never

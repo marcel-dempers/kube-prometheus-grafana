@@ -2,8 +2,8 @@
 namespace: monitoring
 
 prometheus:
-  #endpoint to the api server I.E https://kubernetes.default
-  k8-api-server: https://************************************
+  #endpoint to the api server I.E 
+  k8-api-server: https://kubernetes.default
   service:
     # ! DO NOT USE prometheus as a name: https://github.com/kubernetes/kubernetes/issues/25573
     name: prometheus-svc

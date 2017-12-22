@@ -1,9 +1,10 @@
 # Prometheus \ Grafana on Kubernetes
 
 
-Helm chart for deploying Prometheus and Grafana with full built in Kubernetes pod and infrastructure dashboard built in
+Helm chart for deploying Prometheus and Grafana with full built in Kubernetes pod and infrastructure dashboard
 
 <img src="grafana.png" />
+
 ## Prerequisites
 
 * Kubernetes cluster up and running

@@ -80,7 +80,7 @@ prometheus:
 
 grafana:
   spec:
-    image: grafana/grafana:3.1.1
+    image: grafana/grafana:4.6.3
   prometheus:
     endpoint: http://prometheus-svc:9090
   dashboards:

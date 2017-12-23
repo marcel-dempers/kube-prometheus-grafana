@@ -9,74 +9,70 @@ prometheus:
     name: prometheus-svc
     port: 9090
   spec:
-    image: quay.io/coreos/prometheus:v1.1.1
+    image: prom/prometheus:v2.0.0
   rules:
-    cpu-usage.rules: |+
-      "ALERT NodeCPUUsage \n
-        IF (100 - (avg by (instance) (irate(node_cpu{name=\"node-exporter\",mode=\"idle\"}[5m])) * 100)) > 75 \n
-        FOR 2m \n
-        LABELS { \n
-         severity=\"page\" \n
-        } \n
-        ANNOTATIONS { \n
-          SUMMARY = \"{{$labels.instance}}: High CPU usage detected\", \n
-          DESCRIPTION = \"{{$labels.instance}}: CPU usage is above 75% (current value is: {{ $value }})\" \n
-        }"
-    load-average.rules: |+
-      "ALERT NodeLoadAverage \n
-         IF ((node_load5 / count without (cpu, mode) (node_cpu{mode=\"system\"})) > 1) \n
-         FOR 2m \n
-         LABELS { \n
-           severity=\"page\" \n
-         } \n
-         ANNOTATIONS { \n
-           SUMMARY = \"{{$labels.instance}}: High LA detected\", \n
-           DESCRIPTION = \"{{$labels.instance}}: LA is high\" \n
-         }"
-    low-disk-space.rules: |+
-      "ALERT NodeLowRootDisk \n
-        IF ((node_filesystem_size{mountpoint=\"/root-disk\"} - node_filesystem_free{mountpoint=\"/root-disk\"} ) / node_filesystem_size{mountpoint=\"/root-disk\"} * 100) > 75 \n
-        FOR 2m \n
-        LABELS { \n
-          severity=\"page\" \n
-        } \n
-        ANNOTATIONS { \n
-          SUMMARY = \"{{$labels.instance}}: Low root disk space\", \n
-          DESCRIPTION = \"{{$labels.instance}}: Root disk usage is above 75% (current value is: {{ $value }})\" \n
-        } \n
-
-      ALERT NodeLowDataDisk \n
-        IF ((node_filesystem_size{mountpoint=\"/data-disk\"} - node_filesystem_free{mountpoint=\"/data-disk\"} ) / node_filesystem_size{mountpoint=\"/data-disk\"} * 100) > 75 \n
-        FOR 2m \n
-        LABELS { \n
-          severity=\"page\" \n
-        } \n
-        ANNOTATIONS { \n
-          SUMMARY = \"{{$labels.instance}}: Low data disk space\", \n
-            DESCRIPTION = \"{{$labels.instance}}: Data disk usage is above 75% (current value is: {{ $value }})\" \n
-        }"
-    mem-usage.rules: |+
-      "ALERT NodeSwapUsage \n
-        IF (((node_memory_SwapTotal-node_memory_SwapFree)/node_memory_SwapTotal)*100) > 75 \n
-        FOR 2m \n
-        LABELS { \n
-          severity=\"page\" \n
-        } \n
-        ANNOTATIONS { \n
-          SUMMARY = \"{{$labels.instance}}: Swap usage detected\", \n
-          DESCRIPTION = \"{{$labels.instance}}: Swap usage usage is above 75% (current value is: {{ $value }})\" \n
-        } \n
-
-      ALERT NodeMemoryUsage \n
-        IF (((node_memory_MemTotal-node_memory_MemFree-node_memory_Cached)/(node_memory_MemTotal)*100)) > 75 \n
-        FOR 2m \n
-        LABELS { \n
-          severity=\"page\" \n
-        } \n
-        ANNOTATIONS { \n
-          SUMMARY = \"{{$labels.instance}}: High memory usage detected\", \n
-          DESCRIPTION = \"{{$labels.instance}}: Memory usage is above 75% (current value is: {{ $value }})\" \n
-        }"
+    group.rules: |
+    groups:
+    - name: rules
+      rules:
+      - alert: NodeCPUUsage
+        expr: (100 - (avg(irate(node_cpu{mode="idle",name="node-exporter"}[5m])) BY (instance)
+          * 100)) > 75
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          DESCRIPTION: '{{$labels.instance}}: CPU usage is above 75% (current value is:
+            {{ $value }})'
+          SUMMARY: '{{$labels.instance}}: High CPU usage detected'
+      - alert: NodeLoadAverage
+        expr: ((node_load5 / count(node_cpu{mode="system"}) WITHOUT (cpu, mode)) > 1)
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          DESCRIPTION: '{{$labels.instance}}: LA is high'
+          SUMMARY: '{{$labels.instance}}: High LA detected'
+      - alert: NodeLowRootDisk
+        expr: ((node_filesystem_size{mountpoint="/root-disk"} - node_filesystem_free{mountpoint="/root-disk"})
+          / node_filesystem_size{mountpoint="/root-disk"} * 100) > 75
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          DESCRIPTION: '{{$labels.instance}}: Root disk usage is above 75% (current value
+            is: {{ $value }})'
+          SUMMARY: '{{$labels.instance}}: Low root disk space'
+      - alert: NodeLowDataDisk
+        expr: ((node_filesystem_size{mountpoint="/data-disk"} - node_filesystem_free{mountpoint="/data-disk"})
+          / node_filesystem_size{mountpoint="/data-disk"} * 100) > 75
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          DESCRIPTION: '{{$labels.instance}}: Data disk usage is above 75% (current value
+            is: {{ $value }})'
+          SUMMARY: '{{$labels.instance}}: Low data disk space'
+      - alert: NodeSwapUsage
+        expr: (((node_memory_SwapTotal - node_memory_SwapFree) / node_memory_SwapTotal)
+          * 100) > 75
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          DESCRIPTION: '{{$labels.instance}}: Swap usage usage is above 75% (current value
+            is: {{ $value }})'
+          SUMMARY: '{{$labels.instance}}: Swap usage detected'
+      - alert: NodeMemoryUsage
+        expr: (((node_memory_MemTotal - node_memory_MemFree - node_memory_Cached) / (node_memory_MemTotal)
+          * 100)) > 75
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          DESCRIPTION: '{{$labels.instance}}: Memory usage is above 75% (current value
+            is: {{ $value }})'
+          SUMMARY: '{{$labels.instance}}: High memory usage detected'
 
 grafana:
   spec:

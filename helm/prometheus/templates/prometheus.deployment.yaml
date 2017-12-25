@@ -26,10 +26,10 @@ spec:
       - name: prometheus
         image: {{ .Values.prometheus.spec.image }}
         args:
-          - '-storage.local.retention=$(STORAGE_RETENTION)'
-          - '-storage.local.memory-chunks=$(STORAGE_MEMORY_CHUNKS)'
-          - '-config.file=/etc/prometheus/prometheus.yml'
-          - '-alertmanager.url=http://alertmanager:9093/alertmanager'
+          #- '-storage.local.retention=$(STORAGE_RETENTION)'
+          #- '-storage.local.memory-chunks=$(STORAGE_MEMORY_CHUNKS)'
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          #- '-alertmanager.url=http://alertmanager:9093/alertmanager'
           #- '-web.external-url=http://{{ .Values.prometheus.service.name }}:{{ .Values.prometheus.service.port }}'
         ports:
         - name: web

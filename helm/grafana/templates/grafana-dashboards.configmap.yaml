@@ -6,4 +6,3 @@ metadata:
   namespace: {{ .Values.namespace }}
 data:
   pods.dashboard.json: {{ index .Values "grafana" "dashboards" "pods" | quote }}
-  resources.dashboard.json: {{ index .Values "grafana" "dashboards" "resources" | quote  }}

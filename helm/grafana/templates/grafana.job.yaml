@@ -61,14 +61,6 @@ spec:
           --data-binary @-;
           echo "" ;
 
-          file="resources.dashboard.json"
-          echo "importing $file" &&
-          (echo '{"dashboard":';cat "$file";echo ',"inputs":[{"name":"DS_KUBERNETES","pluginId":"prometheus","type":"datasource","value":"kubernetes"}]}') | curl --silent --fail --show-error \
-          --request POST $GRAFANA_API/api/dashboards/import \
-          --header "Content-Type: application/json" \
-          --data-binary @-;
-          echo "" ;
-
           while true; do
           sleep 1m ;
           done

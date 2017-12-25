@@ -1,4 +1,4 @@
-# Prometheus \ Grafana on Kubernetes
+# Prometheus 2.0 \ Grafana 4.6.3 on Kubernetes 1.8
 
 
 Helm chart for deploying Prometheus and Grafana with full built in Kubernetes pod and infrastructure dashboard

@@ -5,4 +5,4 @@ metadata:
   name: grafana-dashboards
   namespace: {{ .Values.namespace }}
 data:
-  pods.dashboard.json: {{ index .Values "grafana" "dashboards" "pods" | quote }}
+{{ (.Files.Glob "dashboards/*").AsConfig | indent 2 }}

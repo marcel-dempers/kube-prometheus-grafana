@@ -52,14 +52,17 @@ spec:
               echo "" ;
           fi
           done ;
-
-          file="pods.dashboard.json"
-          echo "importing $file" &&
-          (echo '{"dashboard":';cat "$file";echo ',"inputs":[{"name":"DS_KUBERNETES","pluginId":"prometheus","type":"datasource","value":"kubernetes"}]}') | curl --silent --fail --show-error \
-          --request POST $GRAFANA_API/api/dashboards/import \
-          --header "Content-Type: application/json" \
-          --data-binary @-;
-          echo "" ;
+          
+          for file in *-dashboard.json ; do
+          if [ -e "$file" ] ; then
+            echo "importing $file" &&
+            (echo '{"dashboard":';cat "$file";echo ',"inputs":[{"name":"DS_KUBERNETES","pluginId":"prometheus","type":"datasource","value":"kubernetes"}]}') | curl --silent --fail --show-error \
+            --request POST $GRAFANA_API/api/dashboards/import \
+            --header "Content-Type: application/json" \
+            --data-binary @-;
+            echo "" ;
+          fi
+          done ;
 
           while true; do
           sleep 1m ;

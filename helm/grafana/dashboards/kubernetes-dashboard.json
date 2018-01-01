@@ -201,7 +201,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",kubernetes_io_hostname=~\"minikube\"}[2m])) / sum (machine_cpu_cores{kubernetes_io_hostname=~\"minikube\"}) * 100",
+              "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",kubernetes_io_hostname=~\"^$Node$\"}[2m])) / sum (machine_cpu_cores{kubernetes_io_hostname=~\"^$Node$\"}) * 100",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 1,

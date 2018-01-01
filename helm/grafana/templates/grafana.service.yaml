@@ -7,7 +7,6 @@ metadata:
     app: grafana
     component: core
 spec:
-  type: LoadBalancer
   selector:
     app: grafana
     component: core

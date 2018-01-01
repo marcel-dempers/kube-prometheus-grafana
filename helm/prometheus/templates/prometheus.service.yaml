@@ -9,7 +9,6 @@ metadata:
     kubernetes.io/name: "Prometheus"
   name: {{ .Values.prometheus.service.name }}
 spec:
-  type: LoadBalancer
   selector:
     app: prometheus
   ports:

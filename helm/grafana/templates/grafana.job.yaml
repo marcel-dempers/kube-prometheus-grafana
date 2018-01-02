@@ -26,23 +26,13 @@ spec:
           apk add --no-cache curl; 
           #WTF IS THIS ? (Wait for grafana pod to be up before we start importing dashboards!)
           sleep 1m
-          cd /opt/grafana-import-dashboards
-
-          echo "writing datasource..."
-          cat << EOF > k8-datasource.json
-          {
-            "name": "kubernetes",
-            "type": "prometheus",
-            "url": "$PROMETHEUS_SERVICE",
-            "access": "proxy"
-          }
-          EOF
+          cd /opt/grafana-import-datasources
 
           echo "importing data sources..."
           until $(curl --silent --fail --show-error --output /dev/null $GRAFANA_API/api/datasources); do
               printf '.' ; sleep 1 ;
           done ;
-          for file in *-datasource.json ; do
+          for file in *.json ; do
           if [ -e "$file" ] ; then
               echo "importing $file" &&
               curl --silent --fail --show-error \
@@ -53,11 +43,13 @@ spec:
           fi
           done ;
           
-          for file in *-dashboard.json ; do
+          echo "importing dashboards..."
+          cd /opt/grafana-import-dashboards
+          for file in *.json ; do
           if [ -e "$file" ] ; then
             echo "importing $file" &&
-            (echo '{"dashboard":';cat "$file";echo ',"inputs":[{"name":"DS_KUBERNETES","pluginId":"prometheus","type":"datasource","value":"kubernetes"}]}') | curl --silent --fail --show-error \
-            --request POST $GRAFANA_API/api/dashboards/import \
+            (echo '{"dashboard":';cat "$file";echo '}') | curl --silent --fail --show-error \
+            --request POST $GRAFANA_API/api/dashboards/db \
             --header "Content-Type: application/json" \
             --data-binary @-;
             echo "" ;
@@ -72,8 +64,13 @@ spec:
         volumeMounts:
         - name: granafa-dashboards
           mountPath: /opt/grafana-import-dashboards
+        - name: grafana-datasources
+          mountPath: /opt/grafana-import-datasources
       volumes:
       - name: granafa-dashboards
         configMap:
           name: grafana-dashboards
+      - name: grafana-datasources
+        configMap:
+          name: grafana-datasources
       restartPolicy: Never

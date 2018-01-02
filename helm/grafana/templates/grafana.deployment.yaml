@@ -12,6 +12,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/grafana-dashboards.configmap.yaml") . | sha256sum }}
+        checksum/config2: {{ include (print $.Template.BasePath "/grafana-datasources.configmap.yaml") . | sha256sum }}
       labels:
         app: grafana
         component: core

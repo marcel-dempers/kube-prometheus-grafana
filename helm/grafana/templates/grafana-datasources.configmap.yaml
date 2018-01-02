@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+  name: grafana-datasources
+  namespace: {{ .Values.namespace }}
+data:
+  kubernetes.json: |-
+    {
+      "name": "kubernetes",
+      "type": "prometheus",
+      "url": "http://{{ .Values.prometheus.service.name }}:{{ .Values.prometheus.service.port }}",
+      "access": "proxy"
+    }

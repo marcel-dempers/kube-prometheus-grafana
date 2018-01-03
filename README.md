@@ -35,7 +35,6 @@ Once everything is running, you can port-forward to check grafana:
 
 ```
 
-grafana=$(kubectl get pods --namespace=monitoring --selector=app=grafana --output=jsonpath='{.items[*].metadata.name}')
-kubectl port-forward --namespace=monitoring $grafana 3000:3000
+kubectl port-forward --namespace=monitoring $(kubectl get pods --namespace=monitoring --selector=app=grafana --output=jsonpath='{.items[*].metadata.name}') 3000:3000
 
 ```

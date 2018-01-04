@@ -5,7 +5,7 @@ metadata:
   name: prometheus-rules
   namespace: {{ .Values.namespace }}
 data:
-{{ (.Files.Glob "rules/*").AsConfig | indent 2 }}
+{{ (.Files.Glob "config/*.rules").AsConfig | indent 2 }}
 
 ---
 apiVersion: v1

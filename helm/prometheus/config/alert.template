@@ -1,0 +1,55 @@
+global:
+    # ResolveTimeout is the time after which an alert is declared resolved
+    # if it has not been updated.
+  resolve_timeout: 5m
+
+  # The directory from which notification templates are read.
+templates:
+- '/etc/alertmanager-templates/*.tmpl'
+
+# The root route on which each incoming alert enters.
+route:
+
+  # The labels by which incoming alerts are grouped together. For example,
+  # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+  # be batched into a single group.
+
+  group_by: ['alertname', 'cluster', 'service']
+
+  # When a new group of alerts is created by an incoming alert, wait at
+  # least 'group_wait' to send the initial notification.
+  # This way ensures that you get multiple alerts for the same group that start
+  # firing shortly after another are batched together on the first
+  # notification.
+
+  group_wait: 30s
+
+  # When the first notification was sent, wait 'group_interval' to send a batch
+  # of new alerts that started firing for that group.
+
+  group_interval: 5m
+
+  # If an alert has successfully been sent, wait 'repeat_interval' to
+  # resend them.
+
+  #repeat_interval: 1m
+  repeat_interval: 15m
+
+  # A default receiver
+
+  # If an alert isn't caught by a route, send it to default.
+  receiver: default
+
+  # All the above attributes are inherited by all child routes and can
+  # overwritten on each.
+
+  # The child route trees.
+  routes:
+  - match:
+      severity: page
+    receiver: default
+receivers:
+- name: 'default'
+  webhook_configs:
+  - url: 'http://webhook-url'
+    send_resolved: true

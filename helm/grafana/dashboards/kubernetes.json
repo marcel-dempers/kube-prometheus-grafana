@@ -33,6 +33,12 @@
       "id": "singlestat",
       "name": "Singlestat",
       "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
     }
   ],
   "annotations": {
@@ -1250,6 +1256,69 @@
       "titleSize": "h6"
     },
     {
+      "collapse": false,
+      "height": 250,
+      "panels": [
+        {
+          "columns": [],
+          "datasource": "kubernetes",
+          "fontSize": "100%",
+          "id": 27,
+          "links": [],
+          "pageSize": 5,
+          "scroll": true,
+          "showHeader": true,
+          "sort": {
+            "col": 2,
+            "desc": true
+          },
+          "span": 12,
+          "styles": [
+            {
+              "alias": "Time",
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "pattern": "Time",
+              "type": "date"
+            },
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "decimals": 2,
+              "pattern": "/.*/",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "expr": "topk(5, sum (container_memory_working_set_bytes{image!=\"\",name=~\"^k8s_.*\"}) by (pod_name))",
+              "format": "table",
+              "instant": true,
+              "intervalFactor": 2,
+              "legendFormat": " {{pod_name}}",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "title": "Top 5 memory usage",
+          "transform": "table",
+          "type": "table"
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Top Usage Statistics",
+      "titleSize": "h6"
+    },
+    {
       "collapse": true,
       "height": "250px",
       "panels": [
@@ -2099,17 +2168,6 @@
       "showTitle": true,
       "title": "All processes network IO",
       "titleSize": "h6"
-    },
-    {
-      "collapse": false,
-      "height": 250,
-      "panels": [],
-      "repeat": null,
-      "repeatIteration": null,
-      "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
-      "titleSize": "h6"
     }
   ],
   "schemaVersion": 14,
@@ -2172,5 +2230,5 @@
   },
   "timezone": "browser",
   "title": "kubernetes",
-  "version": 3
+  "version": 2
 }

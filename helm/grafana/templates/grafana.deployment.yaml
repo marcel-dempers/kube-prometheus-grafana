@@ -37,6 +37,84 @@ spec:
         volumeMounts:
         - name: grafana-persistent-storage
           mountPath: /var
+      
+      - name: grafana-import-sidecar
+        image: alpine:3.7
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: GRAFANA_API
+          value: http://{{ .Values.grafana.service.name }}:3000
+        command:
+        - "bin/sh"
+        - "-c" 
+        - |-
+          apk add --no-cache curl;
+          echo "waiting for grafana to start..."
+          
+          CNT=0;
+          while [ $CNT -le 90 ]
+          
+          do
+            curl -m 5 -s $GRAFANA_API -o /opt/grafana-import-dashboards/api_status;
+            if [ -s /opt/grafana-import-dashboards/api_status ] 
+            then
+              echo "grafana is up, importing assets..."
+              
+              cd /opt/grafana-import-datasources
+              echo "importing data sources..."
+              until $(curl --silent --fail --show-error --output /dev/null $GRAFANA_API/api/datasources); do
+                  printf '.' ; sleep 1 ;
+              done ;
+              for file in *.json ; do
+              if [ -e "$file" ] ; then
+                  echo "importing $file" &&
+                  curl --silent --fail --show-error \
+                  --request POST $GRAFANA_API/api/datasources \
+                  --header "Content-Type: application/json" \
+                  --data-binary "@$file" ;
+                  echo "" ;
+              fi
+              done ;
+
+              echo "importing dashboards..."
+              cd /opt/grafana-import-dashboards
+              for file in *.json ; do
+              if [ -e "$file" ] ; then
+                echo "importing $file" &&
+                (echo '{"dashboard":';cat "$file";echo '}') | curl --silent --fail --show-error \
+                --request POST $GRAFANA_API/api/dashboards/db \
+                --header "Content-Type: application/json" \
+                --data-binary @-;
+                echo "" ;
+              fi
+              done ;
+
+              echo "sleeping forever until grafana restarts (using cat)"
+              mkfifo pipe && cat pipe
+
+            fi;
+
+            echo "Grafana is not ready. retrying $CNT..."; 
+            sleep 15 || break;
+            CNT=$((CNT+1));
+          done;
+        volumeMounts:
+        - name: granafa-dashboards
+          mountPath: /opt/grafana-import-dashboards
+        - name: grafana-datasources
+          mountPath: /opt/grafana-import-datasources  
       volumes:
       - name: grafana-persistent-storage
         emptyDir: {}
+      - name: granafa-dashboards
+        configMap:
+          name: grafana-dashboards
+      - name: grafana-datasources
+        configMap:
+          name: grafana-datasources

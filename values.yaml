@@ -11,6 +11,8 @@ prometheus:
   spec:
     image: prom/prometheus:v2.0.0
 grafana:
+  service:
+    name: grafana
   spec:
     image: grafana/grafana:4.6.3
   prometheus:

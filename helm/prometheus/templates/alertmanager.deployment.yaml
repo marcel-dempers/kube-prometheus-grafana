@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: alertmanager
-        image: prom/alertmanager:latest
+        image: prom/alertmanager:v0.12.0
         args:
           - '-config.file=/etc/alertmanager/alert.template'
           - '-storage.path=/alertmanager'

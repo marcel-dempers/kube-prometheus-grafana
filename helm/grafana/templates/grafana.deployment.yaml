@@ -61,8 +61,8 @@ spec:
           while [ $CNT -le 90 ]
           
           do
-            curl -m 5 -s $GRAFANA_API -o /opt/grafana-import-dashboards/api_status;
-            if [ -s /opt/grafana-import-dashboards/api_status ] 
+            curl -m 5 -s $GRAFANA_API -o /tmp/api_status;
+            if [ -s /tmp/api_status ] 
             then
               echo "grafana is up, importing assets..."
               

@@ -1,4 +1,4 @@
-# Prometheus 2.0 \ Grafana 4.6.3 on Kubernetes 1.8.7 (no rbac)
+# Prometheus 2.0 \ Grafana 4.6.3 on Kubernetes 1.8.10 (no rbac)
 
 
 Helm chart for deploying Prometheus and Grafana with full built in Kubernetes pod and infrastructure dashboard

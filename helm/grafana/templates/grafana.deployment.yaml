@@ -34,9 +34,9 @@ spec:
             value: "true"
           - name: GF_AUTH_ANONYMOUS_ORG_ROLE
             value: Admin
-        volumeMounts:
-        - name: grafana-persistent-storage
-          mountPath: /var
+        # volumeMounts:
+        # - name: grafana-persistent-storage
+        #   mountPath: /var
       
       - name: grafana-import-sidecar
         image: alpine:3.7
@@ -110,8 +110,8 @@ spec:
         - name: grafana-datasources
           mountPath: /opt/grafana-import-datasources  
       volumes:
-      - name: grafana-persistent-storage
-        emptyDir: {}
+      # - name: grafana-persistent-storage
+      #   emptyDir: {}
       - name: granafa-dashboards
         configMap:
           name: grafana-dashboards
